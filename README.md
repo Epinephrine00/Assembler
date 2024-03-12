@@ -20,4 +20,5 @@
 ----------------------------------
 
 All rights recieved (C) Doohyun Lee in Embeded Lab., Department of Computer Engineering, School of Computer, Korea National University of Transportation
-Genesis 1:3   Dixitque Deus: "Fiat Lux", Et Facta Est Lux.
+
+Genesis 1:3  |  Dixitque Deus: "Fiat Lux", Et Facta Est Lux.
