@@ -1,27 +1,62 @@
-
 class Memory:
-    memory = [0]*(2**16) # 16-bit Address bus : 0~(2^16)-1 range of memory
-
-    # Memory mode selector const : Use when Set or get Memory
-    BIN = 0
-    OCT = 1
-    DEC = 2
-    HEX = 3
+    space, words = 4096, 16
+    memory = [0]*(space*words)
 
     # Offsets
     CodeSegmentOffset = 0x0000
     DataSegmentOffset = 0x0000
 
-
-    def __init__(self, address, isPointer=False):
-        self.address = address
-        self.isPointer = isPointer
-    
-    def setMemory(self, address, value):
+    def __init__(self):
         pass
+
+    
+    def setBit(self, address, value):
+        Memory.memory[address] = value&1
+    def getBit(self, address):
+        return Memory.memory[address]&1
 
     def pushStack(self, value):
         pass
 
+    def setWordByAddress(self, address, value):
+        for i in range(Memory.words):
+            Memory.memory[address+i] = (value>>((Memory.words-1)-i))&1
     def getWordByAddress(self, address):
-        result = ((Memory.memory[address]&1)<<7) | ((Memory.memory[address+1]&1)<<6) | ((Memory.memory[address+2]&1)<<5) | ((Memory.memory[address+3]&1)<<4) | ((Memory.memory[address+4]&1)<<3) | ((Memory.memory[address+5]&1)<<2) | ((Memory.memory[address+6]&1)<<1)| (Memory.memory[address+7]&1)
+        result = 0
+        for i in range(Memory.words):
+            result |= ((Memory.memory[address+i]&1)<<((Memory.words-1)-i))
+        return result
+    
+    def __str__(self):
+        result = ''
+        hexadecimal = ['0', '1','2','3','4','5','6','7','8','9','A','B','C','D','E','F']
+        pointer = 0
+        for i in range((Memory.space*Memory.words)//4):
+            tmp = 0
+            for j in range(4):
+                tmp |= (Memory.memory[pointer]&1)<<(3-j)
+                pointer+=1
+            result+=hexadecimal[tmp]
+            if pointer%128 == 0:
+                result += "\n"
+            elif pointer%64 == 0:
+                result += "  |  "
+            elif pointer%16 == 0:
+                result += "  "
+            elif pointer%8 == 0:
+                result += " "
+                
+        return result
+
+    def __repr__(self) -> str:
+        return self.__str__()
+
+
+# 테스트 코드
+if __name__=="__main__":
+    m = Memory()
+    m.setWordByAddress(0, 0xF0FF)
+    m.setWordByAddress(0x10, 0x110A)
+    print(m)
+    print(m.getWordByAddress(0x0))
+    print(m.getWordByAddress(0x10))
