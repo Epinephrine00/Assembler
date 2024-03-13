@@ -1,5 +1,5 @@
 from memory import Memory
-from data import Stack #아니 솔직히 Queue에서 Q를 빼고 ueue는 다 묵음 아닌가? 진짜모름
+from data import Stack
 
 class CPU:
 
