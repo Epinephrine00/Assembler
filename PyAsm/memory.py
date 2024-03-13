@@ -6,6 +6,10 @@ class Memory:
     CodeSegmentOffset = 0x0000
     DataSegmentOffset = 0x0000
 
+    DATA_SEGMENT = 0
+    CODE_SEGMENT = 1
+
+
     def __init__(self):
         pass
 
@@ -15,13 +19,10 @@ class Memory:
     def getBit(self, address):
         return Memory.memory[address]&1
 
-    def pushStack(self, value):
-        pass
-
     def setWordByAddress(self, address, value):
         for i in range(Memory.words):
             Memory.memory[address+i] = (value>>((Memory.words-1)-i))&1
-    def getWordByAddress(self, address):
+    def getWordByAddress(self, address, mode = 0):
         result = 0
         for i in range(Memory.words):
             result |= ((Memory.memory[address+i]&1)<<((Memory.words-1)-i))
@@ -56,7 +57,7 @@ class Memory:
 if __name__=="__main__":
     m = Memory()
     m.setWordByAddress(0, 0xF0FF)
-    m.setWordByAddress(0x10, 0x110A)
+    m.setWordByAddress(0x10, 0x110A) #최상위 두 워드에 61695(부호 적용시 -28978) 와 4362라는 두 값을 저장
     print(m)
     print(m.getWordByAddress(0x0))
     print(m.getWordByAddress(0x10))

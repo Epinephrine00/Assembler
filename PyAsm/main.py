@@ -10,6 +10,8 @@ def runFileWithPath(path):
     except Exception as e:
         print(e)
         return
+    for line in lines:
+        pass
     
 
 def oneArgv(args) -> None:
