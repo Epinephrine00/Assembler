@@ -1,4 +1,7 @@
+# PADE.py
+# Python-Assembler Developed by Epinephrine00
 import sys
+
 
 
 def runFileWithPath(path):
