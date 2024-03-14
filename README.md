@@ -18,6 +18,15 @@ contact : epinephrine00@a.ut.ac.kr / epi00nephrine@gmail.com
 
 --------------------------------
 
+<h3>어셈블러 파일 :</h3>
+
+PyAsm/pade.py<br/>
+CAsm/<br/>
+KAsm/<br/>
+JAsm/<br/>
+
+--------------------------------
+
 <h3>TODO</h3>
 
  - _Python으로 16비트 CPU 에뮬레이터 구현_ (완?)
