@@ -26,5 +26,8 @@
 
 All rights recieved (C) Doohyun Lee in Embeded Lab., Department of Computer Engineering, School of Computer, Korea National University of Transportation
 
+<p/>
+
 Genesis 1:3  |  _Dixitque Deus: "Fiat Lux", Et Facta Est Lux._
+
 창세기 1:3  |  _하나님이 이르시되 빛이 있으라 하시니 빛이 있었고_
