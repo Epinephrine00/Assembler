@@ -43,6 +43,8 @@ class CPU:
     isFinished = False
     # 각각의 값을 핸들링하는 메소드를 구현하고, True일 때 ALU에서 적당히 처리하도록 구현.
 
+    AccessableMemory = Memory()
+
 
     def SetInstructionPointer(self, address):
         CodeSegmentOffset = Memory.CodeSegmentOffset
@@ -50,14 +52,14 @@ class CPU:
     
 
     def ALU(self):
-        Instruction = Memory.getWordByAddress(CPU.IP(), mode=Memory.CODE_SEGMENT)
-        InstructionType = Instruction>>12
+        Instruction = CPU.AccessableMemory.getWordByAddress(CPU.IP(), mode=Memory.CODE_SEGMENT)
+        InstructionType = (Instruction>>12)&0xF
         
-        if InstructionType&0x7000:
+        if InstructionType==0x7:
             self.RegRefInst(Instruction)
-        elif Instruction&0xF000:
+        elif Instruction==0xF:
             self.IOInst(Instruction)
-        elif Instruction&0x8000:
+        elif Instruction==0x8:
             self.MemRefInst_IndAddress(Instruction)
         else:
             self.MemRefInst_DirAddress(Instruction)
@@ -66,25 +68,22 @@ class CPU:
             return
         elif CPU.isSkipNextInstruction:
             CPU.InstructionPointer += 0x10
+        CPU.InstructionPointer += 0x10
+        self.ALU()
+        return
 
     def RegRefInst(self, Instruction):
-        funcs = []
-        if Instruction&0xF00:
-            funcs = [self.CLA, self.CLE, self.CMA, self.CME]
-            Instruction >>=2
-        elif Instruction&0x0F0:
-            funcs = [self.CIR, self.CIL, self.INC, self.SPA]
-            Instruction = (Instruction>>1)&1
-        elif Instruction&0x00F:
-            funcs = [self.SNA, self.SZA, self.SZE, self.HLT]
-            Instruction &= 1
+        func = {0x7800:self.CLA, 0x7400:self.CLE, 0x7200:self.CMA, 0x7100:self.CME, 
+                 0x7080:self.CIR, 0x7040:self.CIL, 0x7020:self.INC, 0x7010:self.SPA, 
+                 0x7008:self.SNA, 0x7004:self.SZA, 0x7002:self.SZE, 0x7001:self.HLT}[Instruction]
+        func()
 
     def IOInst(self, Instruction):
         pass
     # 입출력 및 인터럽트 등 구현에 대한 "귀찮음" 이슈로 입출력 명령어는 구현하지 않았습니다. 
 
     def MemRefInst_IndAddress(self, Instruction):
-        address = Memory.getWordByAddress(Instruction&0xFFF)&0xFFF
+        address = CPU.AccessableMemory.getWordByAddress(Instruction&0xFFF)&0xFFF
         newInstruction = (Instruction&0x7000)|address
         self.MemRefInst_DirAddress(newInstruction)
         
@@ -102,7 +101,7 @@ class CPU:
 
 
     def AND(self, address):
-        CPU.DataReg = Memory.getWordByAddress(address)
+        CPU.DataReg = CPU.AccessableMemory.getWordByAddress(address)
         CPU.Accumulator = CPU.AX() & CPU.DX()
 
     def FullAdder(self, a, b, cin):
@@ -114,17 +113,18 @@ class CPU:
         return (s, cout) #절대로 사칙연산 안쓰기
     def ADD(self, address):
         result = 0
-        CPU.DataReg = Memory.getWordByAddress(address)
+        c = 0
+        CPU.DataReg = CPU.AccessableMemory.getWordByAddress(address)
         for i in range(16): # 반복문은 반칙같아서 쓰기 싫었지만, 숫자만 다른 같은 코드의 반복이라 "귀찮아서" 반복문 사용
             s, c = self.FullAdder(CPU.AX()>>i&1, CPU.DX()>>i&1, c)
             result |= s<<i
         # 최상위 비트(16번 비트)는 16비트 시스템에선 무시하므로 최종 캐리를 더해주지 않음
         CPU.Accumulator = result&0xffff #그래도 혹시모르니 16비트로 고정
     def LDA(self, address):
-        CPU.Accumulator = Memory.getWordByAddress(address)
+        CPU.Accumulator = CPU.AccessableMemory.getWordByAddress(address)
     
     def STA(self, address):
-        Memory.setWordByAddress(address, CPU.AX())
+        CPU.AccessableMemory.setWordByAddress(address, CPU.AX())
 
     def BUN(self, address):
         CPU.InstructionPointer = address
@@ -138,13 +138,13 @@ class CPU:
         CPU.InstructionPointer = CPU.InstructionPointerStackForBranches.pop()
     
     def ISZ(self, address):
-        CPU.DataReg = Memory.getWordByAddress(address)
+        CPU.DataReg = CPU.AccessableMemory.getWordByAddress(address)
         c = 0
         result = 0
         for i in range(16): # 반복문은 반칙같아서 쓰기 싫었지만, 숫자만 다른 같은 코드의 반복이라 "귀찮아서" 반복문 사용
             s, c = self.FullAdder(CPU.DX()>>i&1, 1>>i&1, c)
             result |= s<<i
-        Memory.setWordByAddress(address, result)
+        CPU.AccessableMemory.setWordByAddress(address, result)
         if not result:
             self.skipNextInstruction()
     
@@ -183,3 +183,32 @@ class CPU:
     def HLT(self):
         self.Halt()
     
+
+# 테스트 코드
+if __name__=="__main__":
+    cpu = CPU()
+    mem = Memory()
+    Memory.CodeSegmentOffset = 0
+    mem.setWordByAddress(0x0000, 0x2000, mode = Memory.CODE_SEGMENT)
+    mem.setWordByAddress(0x0010, 0x1010, mode = Memory.CODE_SEGMENT)
+    mem.setWordByAddress(0x0020, 0x3020, mode = Memory.CODE_SEGMENT)
+    mem.setWordByAddress(0x0030, 0x7001, mode = Memory.CODE_SEGMENT)
+    Memory.DataSegmentOffset = 0x100
+    mem.setWordByAddress(0x0000, 0x001A)
+    mem.setWordByAddress(0x0010, 0x0023)
+    try:
+        cpu.ALU()
+    except Exception as e:
+        print(e,'\n\n')
+    print('\nAccumulator :', CPU.AX())
+    print('\nMemory Values\n'+str(mem))
+
+"""
+테스트용 기계어 코드(및 그 어셈블리 표기)
+LDA 0x000  -> 0x0000 : 2000 
+ADD 0x010  -> 0x0010 : 1010
+STA 0x020  -> 0x0020 : 3020
+HLT        -> 0x0030 : 7001
+아직 어셈블러는 안만들어서
+직접 기계어로 번역 & 메모리 할당해서 돌려봄
+"""
