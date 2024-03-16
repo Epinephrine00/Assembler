@@ -14,6 +14,9 @@ int LC;
 
 void FirstPass(int count, char** lines);
 char* strip(char* line);
+int find(char* line, char c);
+bool isLabelIncluded(char* line);
+
 
 
 int main(int argc, char* argv[]){
@@ -94,16 +97,23 @@ char* strip(char* line){
     return result;
 }
 
-char
+int find(char* line, char c){
+    char* result;
+    int s = 01;
+    for(;s<strlen(line);s++) if(line[s]==c) return s;
+    return -1;
+}
+
+bool isLabelIncluded(char* line){
+
+}
 
 void FirstPass(int count, char** lines){
     LC = 0;
 
     for(int i = 0; i < count; i++){
         //printf("%s | %ld\n",lines[i], strlen(lines[i]));
-        for(int j=0; j<strlen(lines[i]); j++){
-            printf("%c", lines[i][j]);
-        }
+        
         printf("\n");
     }
 
