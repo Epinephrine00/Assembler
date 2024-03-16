@@ -7,7 +7,10 @@ class Queue:
     
     def pop(self):
         r = self.queue[0]
-        self.queue = self.queue[1:]
+        if len(self.queue)>1:
+            self.queue = self.queue[1:]
+        else:
+            self.queue = []
         return r
     
     def append(self, value):

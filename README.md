@@ -45,7 +45,7 @@ JAsm/
 
 ----------------------------------
 
-All rights recieved (C) Doohyun Lee in Embeded Lab., Department of Computer Engineering, School of Computer, Korea National University of Transportation
+All wrongs reserved (ɔ) Doohyun Lee in Embeded System Design Lab., Department of Computer Engineering, School of Computer, Korea National University of Transportation
 
 <br/>
 
