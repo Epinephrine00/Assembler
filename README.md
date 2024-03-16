@@ -37,17 +37,17 @@ JAsm/
     - 추후 자잘한 기능 개선이 필요할수도 있습니다. 
  - _Python으로 64KB 메모리 에뮬레이터 구현_ (완)
     - 이건 사칙연산 썼습니다,,,, 리스트로 구현했는데 인덱싱때문에 그냥 반복문 돌리고 인덱스 + - 썼습니다... 
- - Python으로 어셈블러 구현
- - C로 어셈블러 구현
+ - Python으로 어셈블러 구현 (진행중)
+ - C로 어셈블러 구현 (진행중)
  - Kotlin으로 어셈블러 구현
  - Java로 어셈블러 구현
  - Assembly로 어셈블러 구현
 
 ----------------------------------
 
-All wrongs reserved (ɔ) Doohyun Lee in Embeded System Design Lab., Department of Computer Engineering, School of Computer, Korea National University of Transportation
+All Wrongs Reserved (ɔ) Doohyun Lee in Embeded System Design Lab., Department of Computer Engineering, School of Computer, Korea National University of Transportation
 
 <br/>
 
 Genesis 1:3  |  _Dixitque Deus: "Fiat Lux", Et Facta Est Lux._  
-창세기 1:3  |  _하나님이 이르시되 빛이 있으라 하시니 빛이 있었고_
+창세기 1:3  |  _하나님이 이르시되 빛이 있으라 하시니 빛이 있었고._
