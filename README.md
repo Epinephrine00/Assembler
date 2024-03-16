@@ -18,11 +18,11 @@ contact : epinephrine00@a.ut.ac.kr / epi00nephrine@gmail.com
 
 --------------------------------
 
-<h3>어셈블러 파일 :</h3>
+<h3>어셈블러 소스코드 파일 :</h3>
 
 ```
 PyAsm/pade.py
-CAsm/
+CAsm/cas_cade.c
 KAsm/
 JAsm/
 ```
