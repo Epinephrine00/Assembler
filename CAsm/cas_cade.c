@@ -19,6 +19,7 @@ struct str2intDict{
 
 int LC;
 int labelCount;
+bool secondPassStopFlag = false;
 
 struct str2intDict* labelDict;
 
@@ -204,13 +205,76 @@ void FirstPass(int count, str* lines){
         printf("%s : %d\n", labelDict[i].key, labelDict[i].value);
     }
 
+    printf("-- Debug : First Pass Finished. Calling Second Pass...\n");
     SecondPass(count, lines);
 
     return;
 }
 
+str delabeler(str line){
+    int cond = find(line, ',');
+    if(cond==-1) return strip(line);
+    str result = (str)malloc(MAX_LEN * sizeof(char));
+    for(int i=cond+1; i<strlen(line); i++) result[i-(cond+1)] = line[i];
+    return strip(result);
+}
+
+str getInstruction(str line){
+    str result = (str)malloc(MAX_LEN * sizeof(char));
+    str delabeled = (str)malloc(MAX_LEN * sizeof(char));
+    delabeled = delabeler(line);
+    for(int i=0; i<3; i++) result[i] = delabeled[i];
+    return result;
+}
+
+
+bool isPseudoInstruction(str line){
+    str label = (str)malloc(MAX_LEN * sizeof(char));
+    str instruction = (str)malloc(MAX_LEN * sizeof(char));
+    str address = (str)malloc(MAX_LEN * sizeof(char));
+    str delabeled = (str)malloc(MAX_LEN * sizeof(char));
+    int labelends = find(line, ',');
+    delabeled = delabeler(line);
+    instruction = getInstruction(line);
+    if(labelends==-1) label = NULL;
+    else for(int i=0; i<labelends; i++) label[i] = line[i];
+    for(int i=4; i<strlen(delabeled); i++) address[i-4] = delabeled[i];
+    if(strcmp(instruction, "ORG")==0){
+        LC = atoi(address);
+        return true;
+    }
+    else if(strcmp(instruction, "END")==0){
+        secondPassStopFlag = true;
+        return true;
+    }
+    else if(strcmp(instruction, "HEX")==0){
+        // 값 넣는 내용 추가할것
+        LC++;
+        return true;
+    }
+    else if(strcmp(instruction, "DEC")==0){
+        // 값 넣는 내용 추가할것
+        LC++;
+        return true;
+    }
+    return false;
+}
+
 
 void SecondPass(int count, str* lines){
     LC = 0;
+    printf("-- Debug : Second Pass Begin\n");
+
+    for(int i=0; i<count; i++){
+        if(isPseudoInstruction(lines[i])){
+            if(secondPassStopFlag) break;
+            else continue;
+        }
+        else if(isMRInstruction(lines[i])){
+            //asdf;
+        }
+
+        
+    }
     return;
 }
