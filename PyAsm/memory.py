@@ -29,6 +29,7 @@ class Memory:
         for i in range(Memory.words):
             Memory.memory[address+i] = (value>>((Memory.words-1)-i))&1
     def getWordByAddress(self, address, mode = 0):
+        #address <<=4
         if mode == 0:
             address+=Memory.DataSegmentOffset
         elif mode == 1:

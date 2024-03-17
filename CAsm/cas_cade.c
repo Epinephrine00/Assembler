@@ -18,17 +18,21 @@ struct str2intDict{
 } str2intDict;
 
 int LC;
+int labelCount;
 
 struct str2intDict* labelDict;
 
 
 void FirstPass(int count, str* lines);
+void SecondPass(int count, str* lines);
 str strip(str line);
 int find(str line, char c);
 bool labelIncluded(str line);
 int findDict(str key);
 int lenDict();
 bool isORG(str line);
+bool isEND(str line);
+str strupr(str line);
 
 
 
@@ -152,8 +156,9 @@ bool labelIncluded(str line){
     if(cond==-1) return false;
     for(int i=0; i<cond; i++) label[i] = line[i];
     if(findDict(label)==-1){
-        labelDict[lenDict()].key = label;
-        labelDict[lenDict()].value = LC;
+        labelDict[labelCount].key = label;
+        labelDict[labelCount].value = LC;
+        labelCount++;
     }
     return true;
 }
@@ -162,11 +167,25 @@ bool isORG(str line){
     str instruction = (str)malloc(MAX_LEN * sizeof(char));
     str address = (str)malloc(MAX_LEN * sizeof(char));
     for(int i=0; i<3; i++) instruction[i] = line[i];
-    for(int i=4; i<strlen(line); i++) address[i] = line[i];
-    printf("%s : %s\n", instruction, address);
+    for(int i=4; i<strlen(line); i++) address[i-4] = line[i];
+    //printf("%s : isORG = %d  | address = %s\n", instruction, strcmp(instruction, "ORG"), address);
     if(strcmp(instruction, "ORG")==0){
-
+        LC = atoi(address);
+        return true;
     }
+    return false;
+}
+
+bool isEND(str line){
+    str instruction = (str)malloc(MAX_LEN * sizeof(char));
+    for(int i=0; i<3; i++) instruction[i] = line[i];
+    if(strcmp(instruction, "END")==0) return true;
+    return false;
+}
+
+str strupr(str line){
+    for(int i=0;i<strlen(line);i++) if((int)line[i]>0x60 && (int)line[i]<0x7B) line[i]-=0x20;
+    return line;
 }
 
 void FirstPass(int count, str* lines){
@@ -174,10 +193,24 @@ void FirstPass(int count, str* lines){
     printf("-- Debug : First Pass Begin\n");
     for(int i = 0; i < count; i++){
         if(labelIncluded(lines[i])) LC++;
-        isORG(lines[i]);
+        else if(isORG(lines[i])) continue;
+        else if(isEND(lines[i])){break; return;}
+        else LC++;
+        printf("%s  |  LC : %d\n", lines[i], LC);
     }
     printf("%d\n", lenDict());
     printf("%d\n", LC);
+    for(int i=0; i<lenDict(); i++){
+        printf("%s : %d\n", labelDict[i].key, labelDict[i].value);
+    }
 
+    SecondPass(count, lines);
+
+    return;
+}
+
+
+void SecondPass(int count, str* lines){
+    LC = 0;
     return;
 }
