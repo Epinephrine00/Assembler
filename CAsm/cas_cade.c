@@ -9,24 +9,47 @@
 #define MAX_LEN 128
 #define INITIAL_MAX_LINES 4096
 
+typedef enum{false=0, true=1} bool;
+
+typedef char* str;
+
+struct str2intDict{
+    str key;
+    int value;
+} str2intDict;
 
 int LC;
 
-void FirstPass(int count, char** lines);
-char* strip(char* line);
-int find(char* line, char c);
-bool isLabelIncluded(char* line);
+struct str2intDict* labelDict;
+
+
+void FirstPass(int count, str* lines);
+str strip(str line);
+int find(str line, char c);
+bool labelIncluded(str line);
+int findDict(str key);
+int lenDict();
 
 
 
-int main(int argc, char* argv[]){
+int main(int argc, str argv[]){
     FILE* fd;
     char line[MAX_LEN];
-    char** lines = NULL;
+
+    str* lines = NULL;
     int count = 0;
     int max_lines = INITIAL_MAX_LINES;
+    labelDict = (struct str2intDict *)malloc(INITIAL_MAX_LINES * sizeof(struct str2intDict));
+    if (labelDict == NULL){
+        perror("Memory allocation error");
+        return 1;
+    }
+    for (int i = 0; i < INITIAL_MAX_LINES; i++) {
+        labelDict[i].key = NULL;
+        labelDict[i].value = 0;
+    }
 
-    printf("HEllow!, Wodlsre?\n\n");
+    printf("-- Debug : Program Successfuly Initialized and Started!\n\n");
 
     if (argc > 1) {
         fd = fopen(argv[1], "r");
@@ -34,7 +57,7 @@ int main(int argc, char* argv[]){
             perror("Error opening file");
             return 1;
         }
-        lines = (char**)malloc(max_lines * sizeof(char*));
+        lines = (str*)malloc(max_lines * sizeof(str));
         if (lines == NULL) {
             perror("Memory allocation error");
             fclose(fd);
@@ -56,7 +79,7 @@ int main(int argc, char* argv[]){
 
             if (count >= max_lines) {
                 max_lines *= 2;
-                char** temp = realloc(lines, max_lines * sizeof(char*));
+                str* temp = realloc(lines, max_lines * sizeof(str));
                 if (temp == NULL) {
                     perror("Memory reallocation error");
                     fclose(fd);
@@ -70,52 +93,78 @@ int main(int argc, char* argv[]){
         }
         fclose(fd);
         
-
+        printf("-- Debug : printing ASM code\n");
+        printf("-- Debug : count = %d\n", count);
         for (int i = 0; i < count; i++) {
-            printf("%s\n", lines[i]);
+            printf("%s || %d\n", lines[i], i);
         }
+        printf("-- Debug : ASM code Printed\n");
     }
-
+    printf("-- Debug : Calling First Pass\n");
     FirstPass(count, lines);
 
     for (int i = 0; i < count; i++) {
-        free(lines[i]); // 메모리 해제
+        free(lines[i]);
     }
-    free(lines); // 포인터 배열을 가리키는 메모리 해제
+    free(lines); 
+    free(labelDict);
     
     return 0;
 }
 
-char* strip(char* line){
-    char* result;
+str strip(str line){
+    str result;
     int s = 0, e = strlen(line)-1;
     while(line[s]==' ' || line[s]=='\n') s++;
     while(line[e]==' ' || line[e]=='\n') e--;
     //printf("%s %d %d\n", line, s, e);
-    result = (char*)malloc(((e-s)+1) * sizeof(char));
+    result = (str)malloc(((e-s)+1) * sizeof(char));
     for(int i = s; i<=e; i++)result[i-s]=line[i];
     return result;
 }
 
-int find(char* line, char c){
-    char* result;
+int find(str line, char c){
+    str result;
     int s = 01;
     for(;s<strlen(line);s++) if(line[s]==c) return s;
     return -1;
 }
 
-bool isLabelIncluded(char* line){
-
+int findDict(str key){
+    int i = 0;
+    while(labelDict[i].key!=NULL){
+        if(strcmp(labelDict[i].key, key)==0) return i;
+        i++;
+    }
+    return -1;
 }
 
-void FirstPass(int count, char** lines){
-    LC = 0;
+int lenDict(){
+    int i = 0;
+    while(labelDict[i].key!=NULL) i++;
+    return i;
+}
 
-    for(int i = 0; i < count; i++){
-        //printf("%s | %ld\n",lines[i], strlen(lines[i]));
-        
-        printf("\n");
+bool labelIncluded(str line){
+    str label = (str)malloc(MAX_LEN * sizeof(char));;
+    int cond = find(line, ',');
+    if(cond==-1) return false;
+    for(int i=0; i<cond; i++) label[i] = line[i];
+    if(findDict(label)==-1){
+        labelDict[lenDict()].key = label;
+        labelDict[lenDict()].value = LC;
     }
+    return true;
+}
+
+void FirstPass(int count, str* lines){
+    LC = 0;
+    printf("-- Debug : First Pass Begin\n");
+    for(int i = 0; i < count; i++){
+        if(labelIncluded(lines[i])) LC++;
+    }
+    printf("%d\n", lenDict());
+    printf("%d\n", LC);
 
     return;
 }
