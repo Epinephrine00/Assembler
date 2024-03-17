@@ -10,7 +10,6 @@
 #define INITIAL_MAX_LINES 4096
 
 typedef enum{false=0, true=1} bool;
-
 typedef char* str;
 
 struct str2intDict{
@@ -29,6 +28,7 @@ int find(str line, char c);
 bool labelIncluded(str line);
 int findDict(str key);
 int lenDict();
+bool isORG(str line);
 
 
 
@@ -64,8 +64,9 @@ int main(int argc, str argv[]){
             return 1;
         }
 
+
         while (fgets(line, MAX_LEN, fd) != NULL) {
-            lines[count] = strdup(strip(line));
+            lines[count] = strdup(strupr(strip(line)));
             if (lines[count] == NULL) {
                 perror("Memory allocation error");
                 fclose(fd);
@@ -157,11 +158,23 @@ bool labelIncluded(str line){
     return true;
 }
 
+bool isORG(str line){
+    str instruction = (str)malloc(MAX_LEN * sizeof(char));
+    str address = (str)malloc(MAX_LEN * sizeof(char));
+    for(int i=0; i<3; i++) instruction[i] = line[i];
+    for(int i=4; i<strlen(line); i++) address[i] = line[i];
+    printf("%s : %s\n", instruction, address);
+    if(strcmp(instruction, "ORG")==0){
+
+    }
+}
+
 void FirstPass(int count, str* lines){
     LC = 0;
     printf("-- Debug : First Pass Begin\n");
     for(int i = 0; i < count; i++){
         if(labelIncluded(lines[i])) LC++;
+        isORG(lines[i]);
     }
     printf("%d\n", lenDict());
     printf("%d\n", LC);
