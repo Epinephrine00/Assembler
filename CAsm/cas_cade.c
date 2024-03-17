@@ -34,6 +34,8 @@ int lenDict();
 bool isORG(str line);
 bool isEND(str line);
 str strupr(str line);
+bool isPseudoInstruction(str line);
+bool isMRInstruction(str line);
 
 
 
@@ -257,6 +259,10 @@ bool isPseudoInstruction(str line){
         LC++;
         return true;
     }
+    return false;
+}
+
+bool isMRInstruction(str line){
     return false;
 }
 
