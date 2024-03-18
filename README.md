@@ -43,6 +43,18 @@ JAsm/app/src/main/java/jasm/Jade.java (프로젝트 생성만 함)
  - Java로 어셈블러 구현
  - Assembly로 어셈블러 구현
 
+--------------------------------
+
+<h3>Special Thanks</h3>
+
+좋은 강의를 해주시고 즐거운 과제를 내주신 구*근 교수님께 가장 큰 감사를 드립니다. 
+
+ - ...비꼬는게 아닙니다! 진심으로 즐겁게 생각하고있습니다.
+
+<br/>
+
+작업 진행중 귀를 심심하지 않게 해준 다나카 케이이치로, 다나카 미나미, 란즈베리 아서 등 여러 음악인 및 성우분들께 감사드립니다. 
+
 ----------------------------------
 
 All Wrongs Reserved (ɔ) Doohyun Lee in Embeded System Design Lab., Department of Computer Engineering, School of Computer, Korea National University of Transportation
