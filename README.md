@@ -57,7 +57,7 @@ JAsm/app/src/main/java/jasm/Jade.java (프로젝트 생성만 함)
 
 ----------------------------------
 
-All Wrongs Reserved (ɔ) Doohyun Lee in Embeded System Design Lab., Department of Computer Engineering, School of Computer, Korea National University of Transportation
+All Wrongs Reserved (ɔ) Epinephrine00 in Embeded System Design Lab., Department of Computer Engineering, School of Computer, Korea National University of Transportation
 
 <br/>
 

@@ -37,6 +37,8 @@ bool isEND(str line);
 str strupr(str line);
 bool isPseudoInstruction(str line);
 bool isMRInstruction(str line);
+void freeLabelDict();
+void pass(){return;}
 
 
 
@@ -60,11 +62,11 @@ int main(int argc, str argv[]){
         return 1;
     }
     for (int i = 0; i < INITIAL_MAX_LINES; i++) {
-        labelDict[i].key = NULL;
+        labelDict[i].key = NULL;//(str)malloc(MAX_LEN * sizeof(char));
         labelDict[i].value = 0;
     }
 
-    printf("-- Debug : Program Successfuly Initialized and Started!\n\n");
+    //////printf("-- Debug : Program Successfuly Initialized and Started!\n\n");
 
     if (argc > 1) {
         fd = fopen(argv[1], "r");
@@ -109,23 +111,27 @@ int main(int argc, str argv[]){
         }
         fclose(fd);
         
-        printf("-- Debug : printing ASM code\n");
-        printf("-- Debug : count = %d\n", count);
+        //////printf("-- Debug : printing ASM code\n");
+        //////printf("-- Debug : count = %d\n", count);
         for (int i = 0; i < count; i++) {
             printf("%s || %d\n", lines[i], i);
         }
-        printf("-- Debug : ASM code Printed\n");
+        //////printf("-- Debug : ASM code Printed\n");
     }
-    printf("-- Debug : Calling First Pass\n");
+    //////printf("-- Debug : Calling First Pass\n");
     FirstPass(count, lines);
 
     for (int i = 0; i < count; i++) {
         free(lines[i]);
     }
     free(lines); 
-    free(labelDict);
-    
+    freeLabelDict();
     return 0;
+}
+
+void freeLabelDict(){
+    for(int i=0; i<INITIAL_MAX_LINES; i++) free(labelDict[i].key);
+    free(labelDict);
 }
 
 str strip(str line){
@@ -149,6 +155,7 @@ int find(str line, char c){
 int findDict(str key){
     int i = 0;
     while(labelDict[i].key!=NULL){
+        ////////printf("-- Debug : findDict(%s) |  labelDict[%d].key = %s  |  strcmp(labelDict[i].key, key) = %d\n", key, i, labelDict[i].key, strcmp(labelDict[i].key, key));
         if(strcmp(labelDict[i].key, key)==0) return i;
         i++;
     }
@@ -164,14 +171,20 @@ int lenDict(){
 bool labelIncluded(str line){
     str label = (str)malloc(MAX_LEN * sizeof(char));;
     int cond = find(line, ',');
+    //////printf("-- Debug : Function labelIncluded : line = %s  | cond = %d\n", line, cond);
     if(cond==-1){free(label);return false;}
     for(int i=0; i<cond; i++) label[i] = line[i];
+    //////printf("-- Debug : Function labelIncluded : label = %s  |  findDict(label) = %d\n", label, findDict(label));
     if(findDict(label)==-1){
+        //////printf("-- Debug : Function labelIncluded : key = %s  |  value = %d  |  labelCount = %d\n", label, LC, labelCount);
+        //for(int i = 0; i<strlen(label); i++) labelDict[labelCount].key[i] = label[i];
+        //strcpy(labelDict[labelCount].key, label);
         labelDict[labelCount].key = label;
         labelDict[labelCount].value = LC;
         labelCount++;
+        printf("                                  : key = %s  |  value = %d  |  labelCount = %d\n", labelDict[labelCount].key, labelDict[labelCount].value, labelCount);
     }
-    free(label);
+    //free(label);
     return true;
 }
 
@@ -207,7 +220,7 @@ str strupr(str line){
 
 void FirstPass(int count, str* lines){
     LC = 0;
-    printf("-- Debug : First Pass Begin\n");
+    //////printf("-- Debug : First Pass Begin\n");
     for(int i = 0; i < count; i++){
         if(labelIncluded(lines[i])) LC++;
         else if(isORG(lines[i])) continue;
@@ -221,7 +234,7 @@ void FirstPass(int count, str* lines){
         printf("%s : %d\n", labelDict[i].key, labelDict[i].value);
     }
 
-    printf("-- Debug : First Pass Finished. Calling Second Pass...\n");
+    //////printf("-- Debug : First Pass Finished. Calling Second Pass...\n");
     SecondPass(count, lines);
 
     return;
@@ -286,23 +299,36 @@ bool isMRInstruction(str line){
     str instruction = (str)malloc(MAX_LEN * sizeof(char));
     str address = (str)malloc(MAX_LEN * sizeof(char));
     str delabeled = (str)malloc(MAX_LEN * sizeof(char));
+    str I = (str)malloc(MAX_LEN * sizeof(char));
     instruction = getInstruction(line);
     delabeled = delabeler(line);
-    for(int i=4; i<strlen(delabeled); i++) address[i-4] = delabeled[i];
+    bool isI = false;
+    for(int i=4; i<strlen(delabeled); i++){
+        if(delabeled[i]!=' ' && isI==false) address[i-4] = delabeled[i];
+        else isI = true;
+        // line은 strip된 문자열로 들어오므로, ADD A I와 같이 메모리 주소 뒤에 ' ' 기호가 있다면 간접주소방식이라고 판단함. 그 뒤에 뭐가오든 관심없음.
+    }
     int result = 0x0000;
     for(int i=0; i<7; i++){
         if(strcmp(instruction, MRIs[i])==0){
-            result |= i<<3;
+            result |= i<<12;
             result |= labelDict[findDict(address)].value&0x0FFF;
+            result |= (int)isI<<15;
+            goto itsMRInstruction;
         }
     }
     return false;
+itsMRInstruction:
+    //LC 위치에 result를 저장
+    printf("Instruction : %x, %d\n", result, result);
+    LC++;
+    return true;
 }
 
 
 void SecondPass(int count, str* lines){
     LC = 0;
-    printf("-- Debug : Second Pass Begin\n");
+    //////printf("-- Debug : Second Pass Begin\n");
 
     for(int i=0; i<count; i++){
         if(isPseudoInstruction(lines[i])){
@@ -310,7 +336,7 @@ void SecondPass(int count, str* lines){
             else continue;
         }
         else if(isMRInstruction(lines[i])){
-            //asdf;
+            pass();
         }
 
         
