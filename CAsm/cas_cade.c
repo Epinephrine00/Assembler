@@ -22,6 +22,7 @@ int labelCount;
 bool secondPassStopFlag = false;
 
 struct str2intDict* labelDict;
+str* MRIs;
 
 
 void FirstPass(int count, str* lines);
@@ -47,6 +48,13 @@ int main(int argc, str argv[]){
     int count = 0;
     int max_lines = INITIAL_MAX_LINES;
     labelDict = (struct str2intDict *)malloc(INITIAL_MAX_LINES * sizeof(struct str2intDict));
+    MRIs = (str *)malloc(7 * sizeof(str));
+    if (MRIs == NULL){
+        perror("Memory allocation error");
+        return 1;
+    }
+    MRIs[0] = "AND"; MRIs[1] = "ADD"; MRIs[2] = "LDA"; MRIs[3] = "STA"; MRIs[4] = "BUN"; MRIs[5] = "BSA"; MRIs[6] = "ISZ";
+
     if (labelDict == NULL){
         perror("Memory allocation error");
         return 1;
@@ -156,13 +164,14 @@ int lenDict(){
 bool labelIncluded(str line){
     str label = (str)malloc(MAX_LEN * sizeof(char));;
     int cond = find(line, ',');
-    if(cond==-1) return false;
+    if(cond==-1){free(label);return false;}
     for(int i=0; i<cond; i++) label[i] = line[i];
     if(findDict(label)==-1){
         labelDict[labelCount].key = label;
         labelDict[labelCount].value = LC;
         labelCount++;
     }
+    free(label);
     return true;
 }
 
@@ -174,15 +183,20 @@ bool isORG(str line){
     //printf("%s : isORG = %d  | address = %s\n", instruction, strcmp(instruction, "ORG"), address);
     if(strcmp(instruction, "ORG")==0){
         LC = atoi(address);
+        free(instruction);
+        free(address);
         return true;
     }
+    free(instruction);
+    free(address);
     return false;
 }
 
 bool isEND(str line){
     str instruction = (str)malloc(MAX_LEN * sizeof(char));
     for(int i=0; i<3; i++) instruction[i] = line[i];
-    if(strcmp(instruction, "END")==0) return true;
+    if(strcmp(instruction, "END")==0){free(instruction); return true;}
+    free(instruction);
     return false;
 }
 
@@ -243,26 +257,45 @@ bool isPseudoInstruction(str line){
     for(int i=4; i<strlen(delabeled); i++) address[i-4] = delabeled[i];
     if(strcmp(instruction, "ORG")==0){
         LC = atoi(address);
-        return true;
+        goto returntrue;
     }
     else if(strcmp(instruction, "END")==0){
         secondPassStopFlag = true;
-        return true;
+        goto returntrue;
     }
     else if(strcmp(instruction, "HEX")==0){
         // 값 넣는 내용 추가할것
         LC++;
-        return true;
+        goto returntrue;
     }
     else if(strcmp(instruction, "DEC")==0){
         // 값 넣는 내용 추가할것
         LC++;
-        return true;
+        goto returntrue;
     }
     return false;
+returntrue: // 스파게티코드 만들기
+    free(label);
+    free(instruction);
+    free(address);
+    free(delabeled);
+    return true;
 }
 
 bool isMRInstruction(str line){
+    str instruction = (str)malloc(MAX_LEN * sizeof(char));
+    str address = (str)malloc(MAX_LEN * sizeof(char));
+    str delabeled = (str)malloc(MAX_LEN * sizeof(char));
+    instruction = getInstruction(line);
+    delabeled = delabeler(line);
+    for(int i=4; i<strlen(delabeled); i++) address[i-4] = delabeled[i];
+    int result = 0x0000;
+    for(int i=0; i<7; i++){
+        if(strcmp(instruction, MRIs[i])==0){
+            result |= i<<3;
+            result |= labelDict[findDict(address)].value&0x0FFF;
+        }
+    }
     return false;
 }
 
