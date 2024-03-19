@@ -381,6 +381,7 @@ void SecondPass(int count, str* lines){
             freeLabelDict();
             free(lines);
             // free(everythingElse);
+            return;
         }
 
         
