@@ -285,7 +285,7 @@ str in2out(str filename){
     result[dot+2] = 'b';
     result[dot+3] = 'j';
     result[dot+4] = 'e';
-    //obje : .obj defined by Epinephrine00 / 다시 말씀드리지만 Epinephrine00은 제 닉네임입니다.
+    //obje : OBJect defined by Epinephrine00 / 다시 말씀드리지만 Epinephrine00은 제 닉네임입니다.
     return result;
 }
 
