@@ -1,6 +1,7 @@
 # PADE.py
 # Python-Assembler Developed by Epinephrine00
 # python pade.py "Path_of_Your_ASM_File.asm"
+# python pade.py "Path_of_Your_ASM_File.asm" "Path_of_Output_OBJE_File.obje"
 import sys
 
 MRI = {'AND':0x0000, 'ADD':0x1000, 'LDA':0x2000, 'STA':0x3000, 

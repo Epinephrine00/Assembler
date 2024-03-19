@@ -40,6 +40,7 @@ class CPU:
     InstructionPointerStackForBranches = Stack()
     #isBranch = False    # banch 관리를 위해 선언하려 한 두 변수였으나, 놀랍게도(당연하게도) 파이썬은 이미 branch가 잘 구현되어있는 고급 언어이므로 그냥 재귀를 이용하겠습니다
     isSkipNextInstruction = False
+    #allowIncreaseInstructionPointer = True
     isFinished = False
     # 각각의 값을 핸들링하는 메소드를 구현하고, True일 때 ALU에서 적당히 처리하도록 구현.
 
@@ -187,7 +188,12 @@ class CPU:
         self.Halt()
 
     def INP(self):
-        CPU.Accumulator = ord(input()[0])
+        i = input()
+        if i.isdigit():
+            CPU.Accumulator = int(i)&0xFFFF
+        else:
+            CPU.Accumulator = ord(i[0])
+        
     
     def OUT(self):
         print(chr(CPU.Accumulator), end='')

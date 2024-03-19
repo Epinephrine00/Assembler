@@ -1,3 +1,7 @@
+# LOADER.py
+# Loads *.obje file on cpu.CPU and memory.Memory then Runs the code!
+# python loader.py "Path_of_Your_OBJE_File.obje"
+
 from cpu import CPU
 from memory import Memory
 import sys
@@ -6,6 +10,8 @@ import sys
 def main(argc:int, argv:list) -> int:
     if argc<2:
         raise Exception("Invalid Argument")
+    print('\n-- Starting Program...')
+    
     cpu = CPU()
     mem = Memory()
     line = ''
@@ -24,12 +30,15 @@ def main(argc:int, argv:list) -> int:
     Memory.DataSegmentOffset = Memory.CodeSegmentOffset
     for i in instructionList:
         mem.setWordByAddress(i[0], i[1], mode = Memory.ABSOLUTE_ADDRESS)
+    print('\n---------------------------------------------------------\n')
     #print(mem)
     #try:
     cpu.ALU()
     #except Exception as e:
     #    print(e,'\n\n')
-    print('\n\n\n-- Debug : \nAccumulator :', CPU.AX())
+    print('\n\n---------------------------------------------------------')
+    print('\n-- Program End.')
+    print('\n-- Debug : \nAccumulator :', CPU.AX())
     print('\nMemory Values\n'+str(mem))
     
 
