@@ -1,6 +1,8 @@
 // CAS_CADE.c
 // Commandline Accessable Simple C-lang-Assembler Developed by Epinephrine00
-// cas_cade "Path_of_Your_ASM_File.asm" 
+// cas_cade "Path_of_Your_ASM_File.asm"
+// cas_cade "Path_of_Your_ASM_File.asm" "Path_of_Output_OBJE_File.obje"
+// Recommended Output File Extension : *.obje (OBJect defined by Epinephrine00)
 
 #include <stdio.h>
 #include <stdlib.h>
