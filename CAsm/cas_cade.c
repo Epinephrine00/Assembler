@@ -37,6 +37,7 @@ bool isEND(str line);
 str strupr(str line);
 bool isPseudoInstruction(str line);
 bool isMRInstruction(str line);
+bool isValidNonMRInstruction(str line);
 void freeLabelDict();
 void pass(){return;}
 
@@ -66,7 +67,7 @@ int main(int argc, str argv[]){
         labelDict[i].value = 0;
     }
 
-    //////printf("-- Debug : Program Successfuly Initialized and Started!\n\n");
+    ////printf("-- Debug : Program Successfuly Initialized and Started!\n\n");
 
     if (argc > 1) {
         fd = fopen(argv[1], "r");
@@ -111,14 +112,14 @@ int main(int argc, str argv[]){
         }
         fclose(fd);
         
-        //////printf("-- Debug : printing ASM code\n");
-        //////printf("-- Debug : count = %d\n", count);
+        //printf("-- Debug : printing ASM code\n");
+        //printf("-- Debug : count = %d\n", count);
         for (int i = 0; i < count; i++) {
             printf("%s || %d\n", lines[i], i);
         }
-        //////printf("-- Debug : ASM code Printed\n");
+        //printf("-- Debug : ASM code Printed\n");
     }
-    //////printf("-- Debug : Calling First Pass\n");
+    //printf("-- Debug : Calling First Pass\n");
     FirstPass(count, lines);
 
     for (int i = 0; i < count; i++) {
@@ -155,7 +156,7 @@ int find(str line, char c){
 int findDict(str key){
     int i = 0;
     while(labelDict[i].key!=NULL){
-        ////////printf("-- Debug : findDict(%s) |  labelDict[%d].key = %s  |  strcmp(labelDict[i].key, key) = %d\n", key, i, labelDict[i].key, strcmp(labelDict[i].key, key));
+        //printf("-- Debug : findDict(%s) |  labelDict[%d].key = %s  |  strcmp(labelDict[i].key, key) = %d\n", key, i, labelDict[i].key, strcmp(labelDict[i].key, key));
         if(strcmp(labelDict[i].key, key)==0) return i;
         i++;
     }
@@ -171,18 +172,18 @@ int lenDict(){
 bool labelIncluded(str line){
     str label = (str)malloc(MAX_LEN * sizeof(char));;
     int cond = find(line, ',');
-    //////printf("-- Debug : Function labelIncluded : line = %s  | cond = %d\n", line, cond);
+    //printf("-- Debug : Function labelIncluded : line = %s  | cond = %d\n", line, cond);
     if(cond==-1){free(label);return false;}
     for(int i=0; i<cond; i++) label[i] = line[i];
-    //////printf("-- Debug : Function labelIncluded : label = %s  |  findDict(label) = %d\n", label, findDict(label));
+    //printf("-- Debug : Function labelIncluded : label = %s  |  findDict(label) = %d\n", label, findDict(label));
     if(findDict(label)==-1){
-        //////printf("-- Debug : Function labelIncluded : key = %s  |  value = %d  |  labelCount = %d\n", label, LC, labelCount);
+        //printf("-- Debug : Function labelIncluded : key = %s  |  value = %d  |  labelCount = %d\n", label, LC, labelCount);
         //for(int i = 0; i<strlen(label); i++) labelDict[labelCount].key[i] = label[i];
         //strcpy(labelDict[labelCount].key, label);
         labelDict[labelCount].key = label;
         labelDict[labelCount].value = LC;
         labelCount++;
-        printf("                                  : key = %s  |  value = %d  |  labelCount = %d\n", labelDict[labelCount].key, labelDict[labelCount].value, labelCount);
+        printf("                                  : key = %s  |  value = %d  |  labelCount = %d\n", labelDict[labelCount-1].key, labelDict[labelCount-1].value, labelCount);
     }
     //free(label);
     return true;
@@ -220,7 +221,7 @@ str strupr(str line){
 
 void FirstPass(int count, str* lines){
     LC = 0;
-    //////printf("-- Debug : First Pass Begin\n");
+    //printf("-- Debug : First Pass Begin\n");
     for(int i = 0; i < count; i++){
         if(labelIncluded(lines[i])) LC++;
         else if(isORG(lines[i])) continue;
@@ -234,7 +235,7 @@ void FirstPass(int count, str* lines){
         printf("%s : %d\n", labelDict[i].key, labelDict[i].value);
     }
 
-    //////printf("-- Debug : First Pass Finished. Calling Second Pass...\n");
+    //printf("-- Debug : First Pass Finished. Calling Second Pass...\n");
     SecondPass(count, lines);
 
     return;
@@ -299,7 +300,6 @@ bool isMRInstruction(str line){
     str instruction = (str)malloc(MAX_LEN * sizeof(char));
     str address = (str)malloc(MAX_LEN * sizeof(char));
     str delabeled = (str)malloc(MAX_LEN * sizeof(char));
-    str I = (str)malloc(MAX_LEN * sizeof(char));
     instruction = getInstruction(line);
     delabeled = delabeler(line);
     bool isI = false;
@@ -321,14 +321,49 @@ bool isMRInstruction(str line){
 itsMRInstruction:
     //LC 위치에 result를 저장
     printf("Instruction : %x, %d\n", result, result);
+    free(instruction); free(address); free(delabeled);
     LC++;
     return true;
+}
+
+bool isValidNonMRInstruction(str line){
+    str instruction = (str)malloc(MAX_LEN * sizeof(char));
+    instruction = getInstruction(line);
+    int result = -1;
+    if(strcmp(instruction, "CLA")==0) result = 0x7800;
+    else if(strcmp(instruction, "CLE")==0) result = 0x7400;
+    else if(strcmp(instruction, "CMA")==0) result = 0x7200;
+    else if(strcmp(instruction, "CME")==0) result = 0x7100;
+    else if(strcmp(instruction, "CIR")==0) result = 0x7080;
+    else if(strcmp(instruction, "CIL")==0) result = 0x7040;
+    else if(strcmp(instruction, "INC")==0) result = 0x7020;
+    else if(strcmp(instruction, "SPA")==0) result = 0x7010;
+    else if(strcmp(instruction, "SNA")==0) result = 0x7008;
+    else if(strcmp(instruction, "SZA")==0) result = 0x7004;
+    else if(strcmp(instruction, "SZE")==0) result = 0x7002;
+    else if(strcmp(instruction, "HLT")==0) result = 0x7001;
+    else if(strcmp(instruction, "INP")==0) result = 0xF800;
+    else if(strcmp(instruction, "OUT")==0) result = 0xF400;
+    else if(strcmp(instruction, "SKI")==0) result = 0xF200;
+    else if(strcmp(instruction, "SKO")==0) result = 0xF100;
+    else if(strcmp(instruction, "ION")==0) result = 0xF080;
+    else if(strcmp(instruction, "IOF")==0) result = 0xF040;
+    if(result == -1){
+        LC++;
+        return false;
+    }
+    else{
+        //LC 위치에 result를 저장하는 코드 추가할것
+        printf("Instruction : %x, %d\n", result, result);
+        LC++;
+        return true;
+    }
 }
 
 
 void SecondPass(int count, str* lines){
     LC = 0;
-    //////printf("-- Debug : Second Pass Begin\n");
+    ////printf("-- Debug : Second Pass Begin\n");
 
     for(int i=0; i<count; i++){
         if(isPseudoInstruction(lines[i])){
@@ -338,8 +373,20 @@ void SecondPass(int count, str* lines){
         else if(isMRInstruction(lines[i])){
             pass();
         }
+        else if(isValidNonMRInstruction(lines[i])){
+            pass();
+        }
+        else{
+            perror("Invalid Instruction");
+            freeLabelDict();
+            free(lines);
+            // free(everythingElse);
+        }
 
         
     }
     return;
 }
+
+// 코드 길이가 고작 이거밖에 안돼??
+// 어셈블러 어려울줄알았더니 별거 아니네
