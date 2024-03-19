@@ -23,23 +23,31 @@ bool secondPassStopFlag = false;
 
 struct str2intDict* labelDict;
 str* MRIs;
+str outputFilePath;
 
 
 void FirstPass(int count, str* lines);
 void SecondPass(int count, str* lines);
-str strip(str line);
+void initOutputFile();
+void writeFile(int instruction);
+void freeLabelDict();
+void pass(){return;}
+
 int find(str line, char c);
-bool labelIncluded(str line);
 int findDict(str key);
 int lenDict();
+
+str strip(str line);
+str strupr(str line);
+str in2out(str filename);
+
+bool labelIncluded(str line);
 bool isORG(str line);
 bool isEND(str line);
-str strupr(str line);
 bool isPseudoInstruction(str line);
 bool isMRInstruction(str line);
 bool isValidNonMRInstruction(str line);
-void freeLabelDict();
-void pass(){return;}
+
 
 
 
@@ -52,7 +60,8 @@ int main(int argc, str argv[]){
     int max_lines = INITIAL_MAX_LINES;
     labelDict = (struct str2intDict *)malloc(INITIAL_MAX_LINES * sizeof(struct str2intDict));
     MRIs = (str *)malloc(7 * sizeof(str));
-    if (MRIs == NULL){
+    outputFilePath = (str)malloc(MAX_LEN*sizeof(char));
+    if (MRIs == NULL || outputFilePath == NULL){
         perror("Memory allocation error");
         return 1;
     }
@@ -70,6 +79,13 @@ int main(int argc, str argv[]){
     ////printf("-- Debug : Program Successfuly Initialized and Started!\n\n");
 
     if (argc > 1) {
+        if (argc>2){
+            outputFilePath = argv[2];
+        }
+        else{
+            outputFilePath = in2out(argv[1]);
+        }
+        initOutputFile();
         fd = fopen(argv[1], "r");
         if (fd == NULL) {
             perror("Error opening file");
@@ -115,7 +131,7 @@ int main(int argc, str argv[]){
         //printf("-- Debug : printing ASM code\n");
         //printf("-- Debug : count = %d\n", count);
         for (int i = 0; i < count; i++) {
-            printf("%s || %d\n", lines[i], i);
+        //    printf("%s || %d\n", lines[i], i);
         }
         //printf("-- Debug : ASM code Printed\n");
     }
@@ -144,6 +160,11 @@ str strip(str line){
     result = (str)malloc(((e-s)+1) * sizeof(char));
     for(int i = s; i<=e; i++)result[i-s]=line[i];
     return result;
+}
+
+str strupr(str line){
+    for(int i=0;i<strlen(line);i++) if((int)line[i]>0x60 && (int)line[i]<0x7B) line[i]-=0x20;
+    return line;
 }
 
 int find(str line, char c){
@@ -183,7 +204,7 @@ bool labelIncluded(str line){
         labelDict[labelCount].key = label;
         labelDict[labelCount].value = LC;
         labelCount++;
-        printf("                                  : key = %s  |  value = %d  |  labelCount = %d\n", labelDict[labelCount-1].key, labelDict[labelCount-1].value, labelCount);
+        //printf("                                  : key = %s  |  value = %d  |  labelCount = %d\n", labelDict[labelCount-1].key, labelDict[labelCount-1].value, labelCount);
     }
     //free(label);
     return true;
@@ -214,11 +235,6 @@ bool isEND(str line){
     return false;
 }
 
-str strupr(str line){
-    for(int i=0;i<strlen(line);i++) if((int)line[i]>0x60 && (int)line[i]<0x7B) line[i]-=0x20;
-    return line;
-}
-
 void FirstPass(int count, str* lines){
     LC = 0;
     //printf("-- Debug : First Pass Begin\n");
@@ -227,13 +243,13 @@ void FirstPass(int count, str* lines){
         else if(isORG(lines[i])) continue;
         else if(isEND(lines[i])){break; return;}
         else LC++;
-        printf("%s  |  LC : %d\n", lines[i], LC);
+        //printf("%s  |  LC : %d\n", lines[i], LC);
     }
-    printf("%d\n", lenDict());
-    printf("%d\n", LC);
-    for(int i=0; i<lenDict(); i++){
-        printf("%s : %d\n", labelDict[i].key, labelDict[i].value);
-    }
+    //printf("%d\n", lenDict());
+    //printf("%d\n", LC);
+    //for(int i=0; i<lenDict(); i++){
+    //    printf("%s : %d\n", labelDict[i].key, labelDict[i].value);
+    //}
 
     //printf("-- Debug : First Pass Finished. Calling Second Pass...\n");
     SecondPass(count, lines);
@@ -254,6 +270,20 @@ str getInstruction(str line){
     str delabeled = (str)malloc(MAX_LEN * sizeof(char));
     delabeled = delabeler(line);
     for(int i=0; i<3; i++) result[i] = delabeled[i];
+    return result;
+}
+
+
+str in2out(str filename){
+    str result = (str)malloc(MAX_LEN * sizeof(char));
+    int dot = find(filename, '.');
+    for(int i=0; i<dot; i++) result[i] = filename[i];
+    result[dot] = '.';
+    result[dot+1] = 'o';
+    result[dot+2] = 'b';
+    result[dot+3] = 'j';
+    result[dot+4] = 'e';
+    //obje : .obj defined by Epinephrine00 / 다시 말씀드리지만 Epinephrine00은 제 닉네임입니다.
     return result;
 }
 
@@ -318,9 +348,10 @@ bool isMRInstruction(str line){
         }
     }
     return false;
-itsMRInstruction:
+itsMRInstruction: // 프로 스파게티 요리사
     //LC 위치에 result를 저장
-    printf("Instruction : %x, %d\n", result, result);
+    printf("Instruction : %X, %d, \n", result, result);
+    writeFile(result);
     free(instruction); free(address); free(delabeled);
     LC++;
     return true;
@@ -354,10 +385,30 @@ bool isValidNonMRInstruction(str line){
     }
     else{
         //LC 위치에 result를 저장하는 코드 추가할것
-        printf("Instruction : %x, %d\n", result, result);
+        printf("Instruction : %X, %d\n", result, result);
+        writeFile(result);
         LC++;
         return true;
     }
+}
+
+void initOutputFile(){
+    FILE* fd;
+    fd = fopen(outputFilePath, "w");
+    fclose(fd);
+    //printf("filename : %s\n", outputFilePath);
+    return;
+}
+
+void writeFile(int instruction){
+    // LC 위치에 명령어를 올리는게 그.... 어셈블러가 직접 올릴 일은 아니니까
+    // LC와 Instruction을 각각 한줄에 저장해서...
+    // 로더(Loader)..?를 구현해 걔가 메모리에 적재하고 실행까지 시키도록 구현하겠습니다
+    FILE* fd;
+    fd = fopen(outputFilePath, "a");
+    fprintf(fd, "%04X%X", LC, instruction);
+    fclose(fd);
+    pass();
 }
 
 

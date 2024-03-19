@@ -79,8 +79,9 @@ class CPU:
         func()
 
     def IOInst(self, Instruction):
-        pass
-    # 입출력 및 인터럽트 등 구현에 대한 "귀찮음" 이슈로 입출력 명령어는 구현하지 않았습니다. 
+        func = {0xF800:self.INP, 0xF400:self.OUT}[Instruction]
+        func()
+    # 입출력 및 인터럽트 등 구현에 대한 이해도 및 "귀찮음" 이슈로 입출력 명령어들 중 대부분은 구현하지 않았습니다. 
 
     def MemRefInst_IndAddress(self, Instruction):
         address = CPU.AccessableMemory.getWordByAddress(Instruction&0xFFF)&0xFFF
