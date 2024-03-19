@@ -296,6 +296,7 @@ bool isPseudoInstruction(str line){
     str address = (str)malloc(MAX_LEN * sizeof(char));
     str delabeled = (str)malloc(MAX_LEN * sizeof(char));
     int labelends = find(line, ',');
+    long value = 0;
     delabeled = delabeler(line);
     instruction = getInstruction(line);
     if(labelends==-1) label = NULL;
@@ -310,12 +311,16 @@ bool isPseudoInstruction(str line){
         goto returntrue;
     }
     else if(strcmp(instruction, "HEX")==0){
-        // 값 넣는 내용 추가할것
+        printf("-- Debug : Hex %s = %ld\n", address, strtol(address, NULL, 16));
+        value = strtol(address, NULL, 16);
+        writeFile(value);
         LC++;
         goto returntrue;
     }
     else if(strcmp(instruction, "DEC")==0){
-        // 값 넣는 내용 추가할것
+        printf("-- Debug : Dec %s = %d\n", address, atoi(address));
+        value = atoi(address);
+        writeFile(value);
         LC++;
         goto returntrue;
     }
@@ -408,7 +413,7 @@ void writeFile(int instruction){
     // 로더(Loader)..?를 구현해 걔가 메모리에 적재하고 실행까지 시키도록 구현하겠습니다
     FILE* fd;
     fd = fopen(outputFilePath, "a");
-    fprintf(fd, "%04X%X", LC, instruction);
+    fprintf(fd, "%04X%04X", LC, instruction);
     fclose(fd);
     pass();
 }

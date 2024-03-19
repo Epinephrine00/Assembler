@@ -2,6 +2,7 @@
     LDA A
     ADD B
     STA C
+    OUT
     HLT
 A,  DEC 83
 B,  DEC -23

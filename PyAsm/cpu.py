@@ -57,9 +57,9 @@ class CPU:
         
         if InstructionType==0x7:
             self.RegRefInst(Instruction)
-        elif Instruction==0xF:
+        elif InstructionType==0xF:
             self.IOInst(Instruction)
-        elif Instruction==0x8:
+        elif InstructionType==0x8:
             self.MemRefInst_IndAddress(Instruction)
         else:
             self.MemRefInst_DirAddress(Instruction)
@@ -67,8 +67,8 @@ class CPU:
         if CPU.isFinished:
             return
         elif CPU.isSkipNextInstruction:
-            CPU.InstructionPointer += 0x10
-        CPU.InstructionPointer += 0x10
+            CPU.InstructionPointer += 0x1
+        CPU.InstructionPointer += 0x1
         self.ALU()
         return
 
@@ -89,8 +89,10 @@ class CPU:
         self.MemRefInst_DirAddress(newInstruction)
         
     def MemRefInst_DirAddress(self, Instruction):
+        #print("MRI : Instruction - ",hex(Instruction))
         address = Instruction&0xFFF
-        func = (Instruction>>12)&0xF
+        func = (Instruction>>12)&0x7
+        #print(hex(func), hex(address))
         [self.AND, self.ADD, self.LDA, self.STA, self.BUN, self.BSA, self.ISZ][func](address)
 
     def skipNextInstruction(self):
@@ -183,6 +185,12 @@ class CPU:
             self.skipNextInstruction()
     def HLT(self):
         self.Halt()
+
+    def INP(self):
+        CPU.Accumulator = ord(input()[0])
+    
+    def OUT(self):
+        print(chr(CPU.Accumulator), end='')
     
 
 # 테스트 코드
@@ -190,13 +198,13 @@ if __name__=="__main__":
     cpu = CPU()
     mem = Memory()
     Memory.CodeSegmentOffset = 0
-    mem.setWordByAddress(0x0000, 0x2000, mode = Memory.CODE_SEGMENT)
-    mem.setWordByAddress(0x0010, 0x1010, mode = Memory.CODE_SEGMENT)
-    mem.setWordByAddress(0x0020, 0x3020, mode = Memory.CODE_SEGMENT)
-    mem.setWordByAddress(0x0030, 0x7001, mode = Memory.CODE_SEGMENT)
+    mem.setWordByAddress(0x000, 0x2000, mode = Memory.CODE_SEGMENT)
+    mem.setWordByAddress(0x001, 0x1001, mode = Memory.CODE_SEGMENT)
+    mem.setWordByAddress(0x002, 0x3002, mode = Memory.CODE_SEGMENT)
+    mem.setWordByAddress(0x003, 0x7001, mode = Memory.CODE_SEGMENT)
     Memory.DataSegmentOffset = 0x100
-    mem.setWordByAddress(0x0000, 0x001A)
-    mem.setWordByAddress(0x0010, 0x0023)
+    mem.setWordByAddress(0x000, 0x001A)
+    mem.setWordByAddress(0x001, 0x0023)
     try:
         cpu.ALU()
     except Exception as e:

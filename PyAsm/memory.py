@@ -22,6 +22,7 @@ class Memory:
         return Memory.memory[address]&1
 
     def setWordByAddress(self, address, value, mode = 0):
+        address<<=4
         if mode == 0:
             address+=Memory.DataSegmentOffset
         elif mode == 1:
@@ -29,7 +30,7 @@ class Memory:
         for i in range(Memory.words):
             Memory.memory[address+i] = (value>>((Memory.words-1)-i))&1
     def getWordByAddress(self, address, mode = 0):
-        #address <<=4
+        address <<=4
         if mode == 0:
             address+=Memory.DataSegmentOffset
         elif mode == 1:
@@ -40,11 +41,12 @@ class Memory:
         return result
     
     def __str__(self):
-        result = 'address|  0000   0010   0020   0030  |   0040   0050   0060   0070'
+        result = 'address| 0x000  0x001  0x002  0x003  |  0x004  0x005  0x006  0x007'
         hexadecimal = ['0', '1','2','3','4','5','6','7','8','9','A','B','C','D','E','F']
         pointer = 0
+        zerocounter = 0
         for i in range((Memory.space*Memory.words)//4):
-            address = ('0x%4s'%(hex(pointer).split('x')[1].upper())).replace(' ', '0')
+            address = ('.0x%3s'%(hex(pointer>>4).split('x')[1].upper())).replace(' ', '0').replace('.', ' ')
             if pointer%128 == 0:
                 result += "\n"+address+' | '
             elif pointer%64 == 0:
@@ -58,6 +60,13 @@ class Memory:
                 tmp |= (Memory.memory[pointer]&1)<<(3-j)
                 pointer+=1
             result+=hexadecimal[tmp]
+            if tmp==0:
+                zerocounter += 1
+            else:
+                zerocounter = 0
+            if zerocounter>=16 and pointer%128==0:
+                result = '\n'.join(result.split('\n')[:-1])
+                break
                 
         return result
 
