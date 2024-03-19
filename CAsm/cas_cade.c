@@ -132,9 +132,9 @@ int main(int argc, str argv[]){
         
         //printf("-- Debug : printing ASM code\n");
         //printf("-- Debug : count = %d\n", count);
-        for (int i = 0; i < count; i++) {
+        //for (int i = 0; i < count; i++) {
         //    printf("%s || %d\n", lines[i], i);
-        }
+        //}
         //printf("-- Debug : ASM code Printed\n");
     }
     //printf("-- Debug : Calling First Pass\n");
@@ -243,7 +243,7 @@ void FirstPass(int count, str* lines){
     for(int i = 0; i < count; i++){
         if(labelIncluded(lines[i])) LC++;
         else if(isORG(lines[i])) continue;
-        else if(isEND(lines[i])){break; return;}
+        else if(isEND(lines[i])){break;}
         else LC++;
         //printf("%s  |  LC : %d\n", lines[i], LC);
     }
