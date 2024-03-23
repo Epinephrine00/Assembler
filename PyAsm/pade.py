@@ -103,10 +103,6 @@ class Assembler:
         with open(self.outputFilename, 'w') as f:
             f.write(self.MLC)
 
-def main() -> None:
-    asm = Assembler(sys.argv)
-    asm.Compile()
-
 if __name__=="__main__":
     if sys.version_info.major!=3:
         print('파이썬 3버전 이외에선 실행할 수 없습니다. 3.8 이상의 파이썬 버전을 사용해주세요.')
@@ -114,4 +110,5 @@ if __name__=="__main__":
     if sys.version_info.minor<8:
         print('파이썬 3.8 미만에선 실행할 수 없습니다. 3.8 이상의 파이썬 버전을 사용해주세요.')
         sys.exit()
-    main()
+    asm = Assembler(sys.argv)
+    asm.Compile()
