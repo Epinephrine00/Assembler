@@ -5,6 +5,6 @@
     OUT
     HLT
 A,  DEC 83
-B,  DEC -23
+B,  DEC 23
 C,  DEC 0
     END

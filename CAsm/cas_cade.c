@@ -74,11 +74,9 @@ int main(int argc, str argv[]){
         return 1;
     }
     for (int i = 0; i < INITIAL_MAX_LINES; i++) {
-        labelDict[i].key = NULL;//(str)malloc(MAX_LEN * sizeof(char));
+        labelDict[i].key = NULL;
         labelDict[i].value = 0;
     }
-
-    ////printf("-- Debug : Program Successfuly Initialized and Started!\n\n");
 
     if (argc > 1) {
         if (argc>2){
@@ -130,14 +128,7 @@ int main(int argc, str argv[]){
         }
         fclose(fd);
         
-        //printf("-- Debug : printing ASM code\n");
-        //printf("-- Debug : count = %d\n", count);
-        //for (int i = 0; i < count; i++) {
-        //    printf("%s || %d\n", lines[i], i);
-        //}
-        //printf("-- Debug : ASM code Printed\n");
     }
-    //printf("-- Debug : Calling First Pass\n");
     FirstPass(count, lines);
 
     for (int i = 0; i < count; i++) {
@@ -158,7 +149,6 @@ str strip(str line){
     int s = 0, e = strlen(line)-1;
     while(line[s]==' ' || line[s]=='\n') s++;
     while(line[e]==' ' || line[e]=='\n') e--;
-    //printf("%s %d %d\n", line, s, e);
     result = (str)malloc(((e-s)+1) * sizeof(char));
     for(int i = s; i<=e; i++)result[i-s]=line[i];
     return result;
@@ -179,7 +169,6 @@ int find(str line, char c){
 int findDict(str key){
     int i = 0;
     while(labelDict[i].key!=NULL){
-        //printf("-- Debug : findDict(%s) |  labelDict[%d].key = %s  |  strcmp(labelDict[i].key, key) = %d\n", key, i, labelDict[i].key, strcmp(labelDict[i].key, key));
         if(strcmp(labelDict[i].key, key)==0) return i;
         i++;
     }
@@ -195,20 +184,13 @@ int lenDict(){
 bool labelIncluded(str line){
     str label = (str)malloc(MAX_LEN * sizeof(char));;
     int cond = find(line, ',');
-    //printf("-- Debug : Function labelIncluded : line = %s  | cond = %d\n", line, cond);
     if(cond==-1){free(label);return false;}
     for(int i=0; i<cond; i++) label[i] = line[i];
-    //printf("-- Debug : Function labelIncluded : label = %s  |  findDict(label) = %d\n", label, findDict(label));
     if(findDict(label)==-1){
-        //printf("-- Debug : Function labelIncluded : key = %s  |  value = %d  |  labelCount = %d\n", label, LC, labelCount);
-        //for(int i = 0; i<strlen(label); i++) labelDict[labelCount].key[i] = label[i];
-        //strcpy(labelDict[labelCount].key, label);
         labelDict[labelCount].key = label;
         labelDict[labelCount].value = LC;
         labelCount++;
-        //printf("                                  : key = %s  |  value = %d  |  labelCount = %d\n", labelDict[labelCount-1].key, labelDict[labelCount-1].value, labelCount);
     }
-    //free(label);
     return true;
 }
 
@@ -217,7 +199,6 @@ bool isORG(str line){
     str address = (str)malloc(MAX_LEN * sizeof(char));
     for(int i=0; i<3; i++) instruction[i] = line[i];
     for(int i=4; i<strlen(line); i++) address[i-4] = line[i];
-    //printf("%s : isORG = %d  | address = %s\n", instruction, strcmp(instruction, "ORG"), address);
     if(strcmp(instruction, "ORG")==0){
         LC = atoi(address);
         free(instruction);
@@ -239,21 +220,12 @@ bool isEND(str line){
 
 void FirstPass(int count, str* lines){
     LC = 0;
-    //printf("-- Debug : First Pass Begin\n");
     for(int i = 0; i < count; i++){
         if(labelIncluded(lines[i])) LC++;
         else if(isORG(lines[i])) continue;
         else if(isEND(lines[i])){break;}
         else LC++;
-        //printf("%s  |  LC : %d\n", lines[i], LC);
     }
-    //printf("%d\n", lenDict());
-    //printf("%d\n", LC);
-    //for(int i=0; i<lenDict(); i++){
-    //    printf("%s : %d\n", labelDict[i].key, labelDict[i].value);
-    //}
-
-    //printf("-- Debug : First Pass Finished. Calling Second Pass...\n");
     SecondPass(count, lines);
 
     return;
@@ -311,14 +283,12 @@ bool isPseudoInstruction(str line){
         goto returntrue;
     }
     else if(strcmp(instruction, "HEX")==0){
-        printf("-- Debug : Hex %s = %ld\n", address, strtol(address, NULL, 16));
         value = strtol(address, NULL, 16);
         writeFile(value);
         LC++;
         goto returntrue;
     }
     else if(strcmp(instruction, "DEC")==0){
-        printf("-- Debug : Dec %s = %d\n", address, atoi(address));
         value = atoi(address);
         writeFile(value);
         LC++;
@@ -356,8 +326,6 @@ bool isMRInstruction(str line){
     }
     return false;
 itsMRInstruction: // 프로 스파게티 요리사
-    //LC 위치에 result를 저장
-    printf("Instruction : %X, %d, \n", result, result);
     writeFile(result);
     free(instruction); free(address); free(delabeled);
     LC++;
@@ -391,8 +359,6 @@ bool isValidNonMRInstruction(str line){
         return false;
     }
     else{
-        //LC 위치에 result를 저장하는 코드 추가할것
-        printf("Instruction : %X, %d\n", result, result);
         writeFile(result);
         LC++;
         return true;
@@ -403,7 +369,6 @@ void initOutputFile(){
     FILE* fd;
     fd = fopen(outputFilePath, "w");
     fclose(fd);
-    //printf("filename : %s\n", outputFilePath);
     return;
 }
 
@@ -421,7 +386,6 @@ void writeFile(int instruction){
 
 void SecondPass(int count, str* lines){
     LC = 0;
-    ////printf("-- Debug : Second Pass Begin\n");
 
     for(int i=0; i<count; i++){
         if(isPseudoInstruction(lines[i])){
