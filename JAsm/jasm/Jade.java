@@ -8,6 +8,7 @@
 package jasm;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.io.File;
 import java.io.IOException;
 import java.util.Scanner;
@@ -22,7 +23,8 @@ public class Jade {
     private ArrayList<Hash>   SymbolTable     = new ArrayList<>();
     private ArrayList<String> code            = new ArrayList<>();
     private int               LC              = 0;
-    private String            MLC;
+    private String            MLC             = new String();
+    private void addMLC(int content) {this.MLC += String.format("%04X%04X", this.LC, content); return;}
 
     public Jade(String[] args){
         if(args.length>0){
@@ -34,7 +36,6 @@ public class Jade {
             }
             try{this.fileReader(args[0]);}
             catch(IOException e){System.out.println(e.toString());return;}
-            //System.out.println(this.code.get(1));
         }
         else{
             return;
@@ -43,9 +44,12 @@ public class Jade {
 
     public void compile(){
         this.firstPass();
-        this.secondPass();
-        try{this.saveOutputFile();}
-        catch(IOException e){System.out.println(e.toString());return;}
+        try{
+            this.secondPass();
+            this.saveOutputFile();
+        }
+        catch(Exception e){System.out.println(e.toString());return;}
+        
         return;
     }
 
@@ -95,17 +99,72 @@ public class Jade {
         return;
     }
 
-    private void secondPass(){
+    private void secondPass() throws Exception{
         this.LC = 0;
         for(String line : this.code){
             line = line.strip().toUpperCase();
+            int labeldiv = line.indexOf(",");
+            if(labeldiv!=-1){
+                line = line.substring(labeldiv+1, line.length()).strip();
+            }
+            String instruction = "HLT";
+            String address = "";
+            String[] lineDiv = line.split(" ");
+            boolean isI = false;
+            switch(lineDiv.length){
+                default:
+                case 3: if(lineDiv[2].equals("I")){isI=true;}
+                case 2: address = lineDiv[1];
+                case 1: instruction = lineDiv[0];
+            }
+            System.out.println(String.format("instruction : %s  |  address : %s  |  isI : %s", instruction, address, isI?"true":"false"));
+
+            
+            switch(Arrays.asList(this.Pseudo).indexOf(instruction)){
+                case 0:this.LC = Integer.parseInt(address); break;
+                case 1:return;
+                case 2:this.addMLC(Integer.parseInt(address)); this.LC++;break;
+                case 3:this.addMLC(Integer.parseInt(address, 16)); this.LC++;break;
+                case -1:
+                    int code = 0;
+                    int instructionIndex = Arrays.asList(this.MRI).indexOf(instruction);
+                    if(instructionIndex!=-1){
+                        code |= instructionIndex<<12;
+                        for(Hash hash : this.SymbolTable){
+                            if(hash.getKey().equals(address)){
+                                code|=hash.getValue();
+                                break;
+                            }
+                        }
+                        if(isI){code|=0x8000;}
+                        this.addMLC(code);
+                        this.LC++;
+                    }
+                    else{
+                        instructionIndex = Arrays.asList(this.RRI).indexOf(instruction);
+                        if(instructionIndex!=-1){code|=0x7000; code|=1<<(11-instructionIndex);
+                            System.out.println(String.format("레지스터참조명령어감지됨 %04X", code));}
+                        else{
+                            instructionIndex = Arrays.asList(this.IOI).indexOf(instruction);
+                            if(instructionIndex!=-1){code|=0xF000;code|=1<<(11-instructionIndex);
+                                System.out.println(String.format("입출력명령어감지됨 %04X", code));}
+                            else{throw new Exception("Invalid Instruction Detected!");}
+                        }
+                        this.addMLC(code);
+                        this.LC++;
+                    }
+
+            }
         }
         return;
     }
 
     private void saveOutputFile() throws IOException{
+        //System.out.println(String.format("\n\n\nMachine Language Code :\n%s", this.MLC));
+        
         return;
     }
+
 
     public static void main(String[] args) {
         //System.out.println(String.format("%s | %s", args[0], args[1]));
