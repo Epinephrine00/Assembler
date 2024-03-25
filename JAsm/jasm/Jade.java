@@ -9,9 +9,11 @@ package jasm;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.io.File;
-import java.io.IOException;
 import java.util.Scanner;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.io.IOException;
 import jasm.Hash;
 
 public class Jade {
@@ -73,10 +75,8 @@ public class Jade {
                 instruction = line.substring(0,div);
                 address = line.substring(div+1, line.length());
             }
-            System.out.println(String.format("line = %s : instruction : %s | address : %s", line, instruction, address));
             if(line.indexOf(",")!=-1){
                 String label = line.substring(0,line.indexOf(","));
-                System.out.println(String.format("Labeled! label : %s", label));
                 boolean isIn = false; 
                 for(Hash hash : this.SymbolTable){if(hash.getKey().equals(label)){isIn=true;}}
                 if(!isIn){
@@ -88,7 +88,6 @@ public class Jade {
                 this.LC = Integer.parseInt(address);
             }
             else if(instruction.equals("END")){
-                //for(Hash hash : this.SymbolTable){System.out.println(String.format("hash key : %s | value : %d", hash.getKey(), hash.getValue()));}
                 return;
             }
             else{
@@ -117,9 +116,6 @@ public class Jade {
                 case 2: address = lineDiv[1];
                 case 1: instruction = lineDiv[0];
             }
-            System.out.println(String.format("instruction : %s  |  address : %s  |  isI : %s", instruction, address, isI?"true":"false"));
-
-            
             switch(Arrays.asList(this.Pseudo).indexOf(instruction)){
                 case 0:this.LC = Integer.parseInt(address); break;
                 case 1:return;
@@ -142,12 +138,10 @@ public class Jade {
                     }
                     else{
                         instructionIndex = Arrays.asList(this.RRI).indexOf(instruction);
-                        if(instructionIndex!=-1){code|=0x7000; code|=1<<(11-instructionIndex);
-                            System.out.println(String.format("레지스터참조명령어감지됨 %04X", code));}
+                        if(instructionIndex!=-1){code|=0x7000; code|=1<<(11-instructionIndex);}
                         else{
                             instructionIndex = Arrays.asList(this.IOI).indexOf(instruction);
-                            if(instructionIndex!=-1){code|=0xF000;code|=1<<(11-instructionIndex);
-                                System.out.println(String.format("입출력명령어감지됨 %04X", code));}
+                            if(instructionIndex!=-1){code|=0xF000;code|=1<<(11-instructionIndex);}
                             else{throw new Exception("Invalid Instruction Detected!");}
                         }
                         this.addMLC(code);
@@ -161,6 +155,14 @@ public class Jade {
 
     private void saveOutputFile() throws IOException{
         //System.out.println(String.format("\n\n\nMachine Language Code :\n%s", this.MLC));
+        File outputFile = new File(this.outputFilename);
+        if(!outputFile.exists()){
+            outputFile.createNewFile();
+        }
+        PrintWriter printer = new PrintWriter(new FileWriter(outputFile));
+        
+        printer.print(this.MLC);
+        printer.close();
         
         return;
     }
