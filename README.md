@@ -8,9 +8,12 @@
 
 한국교통대학교 컴퓨터공학과 2024년 <컴퓨터 구조> 강의의 2주차 과제에 대한 제출물을 개발하기 위해 시작되었습니다. 
 
-모든 코드는 한국교통대학교 컴퓨터공학전공 22학번 <a  href="https://github.com/Epinephrine00">이두현</a>본인이 강의 내용 외 아무런 외부 도움 없이 독자적으로 작성하였음을 밝힙니다. 
+모든 코드는 한국교통대학교 컴퓨터공학전공 22학번 <a  href="https://github.com/Epinephrine00">이두현</a> 및 19학번 <a href="https://github.com/PuSuu">채준수</a> 학생이 강의자료 및 강의 내용 외 아무런 외부 도움 없이 독자적으로 작성하였음을 밝힙니다. 
 
-contact : epinephrine00@a.ut.ac.kr / epi00nephrine@gmail.com
+contact : 
+
+- 이두현 - epinephrine00@a.ut.ac.kr / epi00nephrine@gmail.com
+- 채준수 - kimoh0605@gmail.com
 
 혹여나 과제 채점 과정에서 코드 작성자의 개인정보 인증이 필요하다면 위 연락처로 연락 부탁드리겠습니다. 
 
