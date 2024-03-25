@@ -26,7 +26,7 @@ dependencies {
 
 application {
     // Define the main class for the application.
-    mainClass.set("kasm.Kade")
+    mainClass.set("kasm.App")
 }
 
 tasks.named<Test>("test") {

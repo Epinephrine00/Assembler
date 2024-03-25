@@ -26,16 +26,16 @@ contact :
 ```
 PyAsm/pade.py
 CAsm/cas_cade.c
-KAsm/app/src/main/kotlin+java/kasm/Kade.kt (프로젝트 생성만 함)
-JAsm/app/src/main/java/jasm/Jade.java (프로젝트 생성만 함)
+JAsm/jasm/Jade.java
 ```
-
+*Java의 경우 시스템상 설치된 JDK를 Gradle이 제대로 잡지 못하는 등 말썽을 부리느라 Gradle 또는 Maven Project가 아닌 *.class, *.java 파일로 작성했습니다.... 
 
 ### 어셈블러 사용 방법
 
 ```
 python PyAsm/pade.py "입력파일 이름.asm" "출력파일 이름(선택).obje"
 CAsm/cas_cade "입력파일 이름.asm" "출력파일 이름(선택).obje"
+cd JAsm & java jasm/Jade "입력파일 이름.asm" "출력파일 이름(선택).obje"
 
  - 출력파일 이름을 입력하지 않으면 "입력파일 이름.obje"로 자동으로 저장됩니다. 
 ```
